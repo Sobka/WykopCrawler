@@ -26,11 +26,11 @@ namespace Crawler
             {
                 case "open":
                     connection.Open();
-                    Console.WriteLine($"Oppening connection to the database");
+                    Console.WriteLine($"Oppening connection to the database...");
                     break;
                 case "close":
                     connection.Close();
-                    Console.WriteLine("Closeing connection to the database");
+                    Console.WriteLine("Closeing connection to the database...");
                     break;
             }
         }

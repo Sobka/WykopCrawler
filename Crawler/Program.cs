@@ -48,6 +48,8 @@ namespace Crawler
                 Console.WriteLine($"{index}. {sponsored}");
                 index++;
             }
+
+            databaseControls.ManageConnection("close");
         }
     }
 }
