@@ -10,7 +10,7 @@ namespace Crawler
     class Program
     {
         private static string databaseName = "Wykop";
-        private static string firstPage = "https://www.wykop.pl/wykopalisko/";
+        private static string firstPage = "https://www.wykop.pl/";
         private static string createMainTable = "CREATE TABLE IF NOT EXISTS Main (" +
             "id TEXT," +
             "title TEXT," +
@@ -20,7 +20,7 @@ namespace Crawler
             "comments NUMBER," +
             "description TEXT," +
             "date DATE);";
-        public static string containerXpath = ".//ul[@id='itemsStream']/li[contains(@class, 'link iC')]";
+        public static string containerXpath = ".//ul[@id='itemsStream']/li[@class='link iC ']";
 
         static void Main(string[] args)
         {
@@ -37,15 +37,14 @@ namespace Crawler
 
             int index = 1;
             foreach (HtmlNode node in nodeCollection)
-            {
-                bool sponsored = nodeManager.GetGenericValue(node, ".//ul[@class='sub-menu inline-list clear-top']").Equals("Wykop Sponsorowany");
+            { 
                 string id = Guid.NewGuid().ToString();
                 string title = nodeManager.GetGenericValue(node, ".//div[@class='lcontrast m-reset-margin']/h2/a").Trim();
-                //int diggs = Int32.Parse(nodeManager.GetGenericValue(node, ".//div[@class='diggbox ']//a//span"));
+                int diggs = nodeManager.GetIntValue(node, ".//div[@class='diggbox ']//a//span");
+                string username = nodeManager.GetGenericValue(node, ".//div[@class='fix-tagline']/a");
 
 
-
-                Console.WriteLine($"{index}. {sponsored}");
+                Console.WriteLine($"{index}. {username}");
                 index++;
             }
 

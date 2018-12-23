@@ -29,5 +29,15 @@ namespace Crawler
             }
             return value;
         }
+
+        public int GetIntValue(HtmlNode node, string xpath)
+        {
+            int value = 0;
+            if (node.SelectSingleNode(xpath) != null)
+            {
+                value = Int32.Parse(node.SelectSingleNode(xpath).InnerText);
+            }
+            return value;
+        }
     }
 }
