@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using HtmlAgilityPack;
 
@@ -35,9 +36,29 @@ namespace Crawler
             int value = 0;
             if (node.SelectSingleNode(xpath) != null)
             {
-                value = Int32.Parse(node.SelectSingleNode(xpath).InnerText);
+                string defaultString = node.SelectSingleNode(xpath).InnerText;
+                Regex re = new Regex(@"\d+");
+                Match match = re.Match(defaultString);
+                value = Int32.Parse(match.ToString());
             }
             return value;
         }
+
+        public string Escape(string stringToBeReplaced)
+        {        
+            return stringToBeReplaced.Replace("&amp", "&").Replace("&quot;", "\"").Replace("&apos;", "'").Replace("&gt;", ">").Replace("&lt;", "<");
+        }
+
+        public DateTime GetDate(HtmlNode node, string xpath, string attribute)
+        {
+            DateTime date = new DateTime(9999, 9, 9, 9, 9, 9);
+            if (node.SelectSingleNode(xpath) != null)
+            {
+                date = DateTime.Parse(node.SelectSingleNode(xpath).GetAttributeValue(attribute, "9999-99-99 99:99:99"));
+            }
+            return date;
+        }
     }
+
+    
 }

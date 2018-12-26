@@ -27,7 +27,7 @@ namespace Crawler
             // Define database controls
             DatabaseControls databaseControls = new DatabaseControls();
             databaseControls.CreateDatabase(databaseName);
-            databaseControls.ManageConnection("open");
+            databaseControls.ManageConnection(DatabaseControls.ConnectionControls.Open);
             databaseControls.CreateTable(createMainTable);
 
             // Define nodes, their xpaths
@@ -39,16 +39,21 @@ namespace Crawler
             foreach (HtmlNode node in nodeCollection)
             { 
                 string id = Guid.NewGuid().ToString();
-                string title = nodeManager.GetGenericValue(node, ".//div[@class='lcontrast m-reset-margin']/h2/a").Trim();
+                string title = nodeManager.Escape(nodeManager.GetGenericValue(node, ".//div[@class='lcontrast m-reset-margin']/h2/a").Trim());
                 int diggs = nodeManager.GetIntValue(node, ".//div[@class='diggbox ']//a//span");
                 string username = nodeManager.GetGenericValue(node, ".//div[@class='fix-tagline']/a");
+                string source = nodeManager.GetGenericValue(node, ".//span[@class='tag create'][1]");
+                int comments = nodeManager.GetIntValue(node, ".//div[@class='row elements']/a");
+                string description = nodeManager.Escape(nodeManager.GetGenericValue(node, ".//div[@class='description']/p/a").Trim());
+                DateTime date = nodeManager.GetDate(node, ".//span[@class='affect']/time", "title");
 
+                databaseControls.InsertIntoDatabase(id, title, diggs, username, source, comments, description, date);
 
-                Console.WriteLine($"{index}. {username}");
+                Console.WriteLine($"{index}. {date}");
                 index++;
             }
 
-            databaseControls.ManageConnection("close");
+            databaseControls.ManageConnection(DatabaseControls.ConnectionControls.Close);
         }
     }
 }
