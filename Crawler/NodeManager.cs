@@ -58,6 +58,30 @@ namespace Crawler
             }
             return date;
         }
+
+        public int GetNumOfPages(string url, string xpath)
+        {
+            string pages = LoadPage(url).DocumentNode.SelectNodes(xpath)[7].InnerText;
+            return Int32.Parse(pages);
+        }
+
+        public string[] GetTags(HtmlNode node, string xpath)
+        {
+            string[] tags = new string[9];
+            HtmlNodeCollection nodes = node.SelectNodes(xpath);
+            for (int i = 0; i < nodes.Count; i++)
+            {
+                if (nodes[i] != null)
+                {
+                    tags[i] = nodes[i].InnerText;
+                }
+                else
+                {
+                    tags[i] = "Brak";
+                }
+            }
+            return tags;
+        }
     }
 
     

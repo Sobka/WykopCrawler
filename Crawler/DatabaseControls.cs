@@ -33,11 +33,11 @@ namespace Crawler
             {
                 case ConnectionControls.Open:
                     connection.Open();
-                    Console.WriteLine($"Oppening connection to the database...");
+                    Console.WriteLine("Opening connection to the database...");
                     break;
                 case ConnectionControls.Close:
                     connection.Close();
-                    Console.WriteLine("Closeing connection to the database...");
+                    Console.WriteLine("Closing connection to the database...");
                     break;
             }
         }
@@ -48,7 +48,7 @@ namespace Crawler
             command.ExecuteNonQuery();
         }
 
-        public void InsertIntoDatabase(string id, string title, int diggs, string username, string source, int comments, string description, DateTime date)
+        public void InsertIntoMain(string id, string title, int diggs, string username, string source, int comments, string description, DateTime date)
         {
             SQLiteParameter[] parameters =
             {
@@ -68,6 +68,28 @@ namespace Crawler
             command.Parameters.AddRange(parameters);
             command.ExecuteNonQuery();
         }
- 
+
+        public void InsertIntoTags(string id, string tag1, string tag2, string tag3, string tag4, string tag5, string tag6, string tag7, string tag8, string tag9)
+        {
+            SQLiteParameter[] parameters =
+            {
+                new SQLiteParameter("@id", id),
+                new SQLiteParameter("@tag1", tag1),
+                new SQLiteParameter("@tag2", tag2),
+                new SQLiteParameter("@tag3", tag3),
+                new SQLiteParameter("@tag4", tag4),
+                new SQLiteParameter("@tag5", tag5),
+                new SQLiteParameter("@tag6", tag6),
+                new SQLiteParameter("@tag7", tag7),
+                new SQLiteParameter("@tag8", tag8),
+                new SQLiteParameter("@tag9", tag9)
+            };
+
+            string insertSQL = "INSERT INTO Tags (id, tag1, tag2, tag3, tag4, tag5, tag6, tag7, tag8, tag9) VALUES (@id, @tag1, @tag2, @tag3, @tag4, @tag5, @tag6, @tag7, @tag8, @tag9)";
+
+            SQLiteCommand command = new SQLiteCommand(insertSQL, connection);
+            command.Parameters.AddRange(parameters);
+            command.ExecuteNonQuery();
+        }      
     }
 }
