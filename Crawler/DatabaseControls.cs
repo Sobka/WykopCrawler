@@ -69,7 +69,7 @@ namespace Crawler
             command.ExecuteNonQuery();
         }
 
-        public void InsertIntoTags(string id, string tag1, string tag2, string tag3, string tag4, string tag5, string tag6, string tag7, string tag8, string tag9)
+        public void InsertIntoTags(string id, string tag1, string tag2, string tag3, string tag4, string tag5, string tag6, string tag7, string tag8, string tag9, string tag10, string tag11)
         {
             SQLiteParameter[] parameters =
             {
@@ -82,10 +82,12 @@ namespace Crawler
                 new SQLiteParameter("@tag6", tag6),
                 new SQLiteParameter("@tag7", tag7),
                 new SQLiteParameter("@tag8", tag8),
-                new SQLiteParameter("@tag9", tag9)
+                new SQLiteParameter("@tag9", tag9),
+                new SQLiteParameter("@tag10", tag10),
+                new SQLiteParameter("@tag11", tag11)
             };
 
-            string insertSQL = "INSERT INTO Tags (id, tag1, tag2, tag3, tag4, tag5, tag6, tag7, tag8, tag9) VALUES (@id, @tag1, @tag2, @tag3, @tag4, @tag5, @tag6, @tag7, @tag8, @tag9)";
+            string insertSQL = "INSERT INTO Tags (id, tag1, tag2, tag3, tag4, tag5, tag6, tag7, tag8, tag9, tag10, tag11) VALUES (@id, @tag1, @tag2, @tag3, @tag4, @tag5, @tag6, @tag7, @tag8, @tag9, @tag10, @tag11)";
 
             SQLiteCommand command = new SQLiteCommand(insertSQL, connection);
             command.Parameters.AddRange(parameters);

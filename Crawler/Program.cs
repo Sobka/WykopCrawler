@@ -10,9 +10,9 @@ namespace Crawler
 {
     class Program
     {
-        private static string databaseName = "Wykop";
-        private static string firstPage = "https://www.wykop.pl/";
-        private static string createMainTable = "CREATE TABLE IF NOT EXISTS Main (" +
+        private static readonly string databaseName = "Wykop";
+        private static readonly string firstPage = "https://www.wykop.pl/";
+        private static readonly string createMainTable = "CREATE TABLE IF NOT EXISTS Main (" +
             "id TEXT," +
             "title TEXT," +
             "diggs NUMBER," +
@@ -21,7 +21,7 @@ namespace Crawler
             "comments NUMBER," +
             "description TEXT," +
             "date DATE);";
-        private static string createTagsTable = "CREATE TABLE IF NOT EXISTS Tags (" +
+        private static readonly string createTagsTable = "CREATE TABLE IF NOT EXISTS Tags (" +
             "id TEXT," +
             "tag1 TEXT," +
             "tag2 TEXT," +
@@ -31,8 +31,10 @@ namespace Crawler
             "tag6 TEXT," +
             "tag7 TEXT," +
             "tag8 TEXT," +
-            "tag9 TEXT);";
-        public static string containerXpath = ".//ul[@id='itemsStream']/li[@class='link iC ']";
+            "tag9 TEXT," +
+            "tag10 TEXT," +
+            "tag11 TEXT);";
+        public static readonly string containerXpath = ".//ul[@id='itemsStream']/li[@class='link iC ']";
 
         static void Main(string[] args)
         {
@@ -52,9 +54,10 @@ namespace Crawler
             int index = 1;
             int page = 1;
             int nullReferences = 0;
+            int skipped = 0;
 
             // Loop over all pages
-            for (int i = 0; i < 2; i++)
+            for (int i = 1; i < 20; i++)
             {
                 // Try-catch block to avoid getting NullReferenceExceptions 
                 try
@@ -70,7 +73,7 @@ namespace Crawler
                         string id = Guid.NewGuid().ToString();
                         string title = nodeManager.Escape(nodeManager.GetGenericValue(node, ".//div[@class='lcontrast m-reset-margin']/h2/a").Trim());
                         int diggs = nodeManager.GetIntValue(node, ".//div[@class='diggbox ']//a//span");
-                        string username = nodeManager.GetGenericValue(node, ".//div[@class='fix-tagline']/a");
+                        string username = nodeManager.GetGenericValue(node, ".//div[@class='fix-tagline']/a").Replace("@", "");
                         string source = nodeManager.GetGenericValue(node, ".//span[@class='tag create'][1]");
                         int comments = nodeManager.GetIntValue(node, ".//div[@class='row elements']/a");
                         string description = nodeManager.Escape(nodeManager.GetGenericValue(node, ".//div[@class='description']/p/a").Trim());
@@ -80,6 +83,7 @@ namespace Crawler
                         if (username.Equals("Wykop Poleca"))
                         {
                             Console.WriteLine($"{index}. Wykop Poleca - post skipped!");
+                            skipped++;
                             continue;       
                         }
 
@@ -94,14 +98,16 @@ namespace Crawler
                         string tag7 = tags[6];
                         string tag8 = tags[7];
                         string tag9 = tags[8];
+                        string tag10 = tags[9];
+                        string tag11 = tags[10];
 
-                        databaseControls.InsertIntoTags(id, tag1, tag2, tag3, tag4, tag5, tag6, tag7, tag8, tag9);
+                        databaseControls.InsertIntoTags(id, tag1, tag2, tag3, tag4, tag5, tag6, tag7, tag8, tag9, tag10, tag11);
 
                         // Insert post info into database
                         databaseControls.InsertIntoMain(id, title, diggs, username, source, comments, description, date);
 
                         // Console output, mostly for debugging
-                        //Console.WriteLine($"{index}. {title}");
+                        Console.WriteLine($"{index}. {title}");
                         index++;
                     }
                 }
@@ -113,7 +119,9 @@ namespace Crawler
                 page++;
             }
             // Close database connection
+            Console.WriteLine("");
             Console.WriteLine($"Total errors: {nullReferences}");
+            Console.WriteLine($"Total post skipped: {skipped}");
             databaseControls.ManageConnection(ConnectionControls.Close);
         }
     }

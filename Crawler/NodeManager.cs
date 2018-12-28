@@ -34,10 +34,10 @@ namespace Crawler
         public int GetIntValue(HtmlNode node, string xpath)
         {
             int value = 0;
-            if (node.SelectSingleNode(xpath) != null)
+            if (node.SelectSingleNode(xpath) != null && !node.SelectSingleNode(xpath).InnerHtml.Equals(" skomentuj"))
             {
                 string defaultString = node.SelectSingleNode(xpath).InnerText;
-                Regex re = new Regex(@"\d+");
+                Regex re = new Regex(@"(\d+)");
                 Match match = re.Match(defaultString);
                 value = Int32.Parse(match.ToString());
             }
@@ -67,17 +67,13 @@ namespace Crawler
 
         public string[] GetTags(HtmlNode node, string xpath)
         {
-            string[] tags = new string[9];
+            string[] tags = new string[11];
             HtmlNodeCollection nodes = node.SelectNodes(xpath);
             for (int i = 0; i < nodes.Count; i++)
             {
                 if (nodes[i] != null)
                 {
-                    tags[i] = nodes[i].InnerText;
-                }
-                else
-                {
-                    tags[i] = "Brak";
+                    tags[i] = nodes[i].InnerText.Replace("#", "");
                 }
             }
             return tags;
