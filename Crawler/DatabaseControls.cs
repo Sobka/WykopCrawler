@@ -92,6 +92,14 @@ namespace Crawler
             SQLiteCommand command = new SQLiteCommand(insertSQL, connection);
             command.Parameters.AddRange(parameters);
             command.ExecuteNonQuery();
-        }      
+        }  
+        
+        public void SetIndex(string tableName, string indexName, string indexColumn)
+        {
+            //CREATE[UNIQUE] INDEX index_name ON table_name(indexed_column);
+            string indexSQL = $"CREATE UNIQUE INDEX {indexName} ON {tableName}({indexColumn});";
+            SQLiteCommand command = new SQLiteCommand(indexSQL, connection);
+            command.ExecuteNonQuery();
+        }
     }
 }

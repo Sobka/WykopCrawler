@@ -44,6 +44,8 @@ namespace Crawler
             databaseControls.ManageConnection(ConnectionControls.Open);
             databaseControls.CreateTable(createMainTable);
             databaseControls.CreateTable(createTagsTable);
+            databaseControls.SetIndex("Main", "idx_main", "id");
+            databaseControls.SetIndex("Tags", "idx_tags", "id");
 
             // Define node manager
             NodeManager nodeManager = new NodeManager();           
@@ -57,7 +59,7 @@ namespace Crawler
             int skipped = 0;
 
             // Loop over all pages
-            for (int i = 1; i < 20; i++)
+            for (int i = 1; i < 5; i++)
             {
                 // Try-catch block to avoid getting NullReferenceExceptions 
                 try
@@ -87,24 +89,13 @@ namespace Crawler
                             continue;       
                         }
 
+                        // Get tags
                         string[] tags = nodeManager.GetTags(node, ".//div[@class='fix-tagline']/a[contains(@class, 'tag affect ')]");
 
-                        string tag1 = tags[0];
-                        string tag2 = tags[1];
-                        string tag3 = tags[2];
-                        string tag4 = tags[3];
-                        string tag5 = tags[4];
-                        string tag6 = tags[5];
-                        string tag7 = tags[6];
-                        string tag8 = tags[7];
-                        string tag9 = tags[8];
-                        string tag10 = tags[9];
-                        string tag11 = tags[10];
 
-                        databaseControls.InsertIntoTags(id, tag1, tag2, tag3, tag4, tag5, tag6, tag7, tag8, tag9, tag10, tag11);
-
-                        // Insert post info into database
+                        // Insert data into database
                         databaseControls.InsertIntoMain(id, title, diggs, username, source, comments, description, date);
+                        databaseControls.InsertIntoTags(id, tags[0], tags[1], tags[2], tags[3], tags[4], tags[5], tags[6], tags[7], tags[8], tags[9], tags[10]);
 
                         // Console output, mostly for debugging
                         Console.WriteLine($"{index}. {title}");
@@ -117,7 +108,7 @@ namespace Crawler
                     Console.WriteLine($"NullReferenceException, total: {nullReferences}");
                 }
                 page++;
-                //something new, ya boi, Asmongold!
+                
             }
             // Close database connection
             Console.WriteLine("");
