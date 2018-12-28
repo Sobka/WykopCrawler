@@ -10,9 +10,9 @@ namespace Crawler
 {
     class Program
     {
-        private static string databaseName = "Wykop";
-        private static string firstPage = "https://www.wykop.pl/";
-        private static string createMainTable = "CREATE TABLE IF NOT EXISTS Main (" +
+        private static readonly string databaseName = "Wykop";
+        private static readonly string firstPage = "https://www.wykop.pl/";
+        private static readonly string createMainTable = "CREATE TABLE IF NOT EXISTS Main (" +
             "id TEXT," +
             "title TEXT," +
             "diggs NUMBER," +
@@ -21,7 +21,7 @@ namespace Crawler
             "comments NUMBER," +
             "description TEXT," +
             "date DATE);";
-        private static string createTagsTable = "CREATE TABLE IF NOT EXISTS Tags (" +
+        private static readonly string createTagsTable = "CREATE TABLE IF NOT EXISTS Tags (" +
             "id TEXT," +
             "tag1 TEXT," +
             "tag2 TEXT," +
@@ -34,7 +34,7 @@ namespace Crawler
             "tag9 TEXT," +
             "tag10 TEXT," +
             "tag11 TEXT);";
-        public static string containerXpath = ".//ul[@id='itemsStream']/li[@class='link iC ']";
+        public static readonly string containerXpath = ".//ul[@id='itemsStream']/li[@class='link iC ']";
 
         static void Main(string[] args)
         {
@@ -57,7 +57,7 @@ namespace Crawler
             int skipped = 0;
 
             // Loop over all pages
-            for (int i = 0; i < 50; i++)
+            for (int i = 1; i < 20; i++)
             {
                 // Try-catch block to avoid getting NullReferenceExceptions 
                 try
@@ -121,7 +121,7 @@ namespace Crawler
             // Close database connection
             Console.WriteLine("");
             Console.WriteLine($"Total errors: {nullReferences}");
-            Console.WriteLine($"Times skipped: {skipped}");
+            Console.WriteLine($"Total post skipped: {skipped}");
             databaseControls.ManageConnection(ConnectionControls.Close);
         }
     }
