@@ -117,7 +117,7 @@ namespace Crawler
                     Console.WriteLine($"NullReferenceException, total: {nullReferences}");
                 }
                 page++;
-                // Somethin different
+                //something new
             }
             // Close database connection
             Console.WriteLine("");
