@@ -21,9 +21,9 @@ namespace Crawler
             return collection;
         }
 
-        public string GetGenericValue(HtmlNode node, string xpath)
+        public string GetInnerTextValue(HtmlNode node, string xpath)
         {
-            string value = "Brak danych";
+            string value = "";
             if (node.SelectSingleNode(xpath) != null)
             {
                 value = node.SelectSingleNode(xpath).InnerText;
@@ -81,6 +81,16 @@ namespace Crawler
                 }
             }
             return tags;
+        }
+
+        public string GetAttribute(HtmlNode node, string xpath, string attribute)
+        {
+            string returnAttribute = "";
+            if (node.SelectSingleNode(xpath) != null)
+            {
+                returnAttribute = node.SelectSingleNode(xpath).GetAttributeValue(attribute, "");
+            }
+            return returnAttribute;
         }
     }
 

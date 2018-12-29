@@ -9,6 +9,36 @@ namespace Crawler
 {
     class DatabaseControls
     {
+        public readonly string createMainTable = "CREATE TABLE IF NOT EXISTS Main (" +
+            "id TEXT," +
+            "title TEXT," +
+            "diggs NUMBER," +
+            "username TEXT," +
+            "source TEXT," +
+            "comments NUMBER," +
+            "description TEXT," +
+            "date DATE);";
+        public readonly string createTagsTable = "CREATE TABLE IF NOT EXISTS Tags (" +
+            "id TEXT," +
+            "tag1 TEXT," +
+            "tag2 TEXT," +
+            "tag3 TEXT," +
+            "tag4 TEXT," +
+            "tag5 TEXT," +
+            "tag6 TEXT," +
+            "tag7 TEXT," +
+            "tag8 TEXT," +
+            "tag9 TEXT," +
+            "tag10 TEXT," +
+            "tag11 TEXT);";
+        public readonly string createCommentsTable = "CREATE TABLE IF NOT EXISTS Comments (" +
+            "id TEXT," +
+            "isOP NUMBER," + // 1 or 0
+            "username TEXT," +
+            "pluses NUMBER," +
+            "comment TEXT," +
+            "via TEXT," +
+            "date DATE);";
 
         public enum ConnectionControls
         {
@@ -96,8 +126,7 @@ namespace Crawler
         
         public void SetIndex(string tableName, string indexName, string indexColumn)
         {
-            //CREATE[UNIQUE] INDEX index_name ON table_name(indexed_column);
-            string indexSQL = $"CREATE UNIQUE INDEX {indexName} ON {tableName}({indexColumn});";
+            string indexSQL = $"CREATE UNIQUE INDEX IF NOT EXISTS {indexName} ON {tableName}({indexColumn});";
             SQLiteCommand command = new SQLiteCommand(indexSQL, connection);
             command.ExecuteNonQuery();
         }
