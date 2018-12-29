@@ -97,7 +97,7 @@ namespace Crawler
                             DateTime opDate = nodeManager.GetDate(opCommentNode, ".//small[@class='affect']/time", "title");
                             Console.WriteLine($"  |-->{opUsername}, {opDate}");
 
-                            // Get all subposts for every post
+                            // Get all subposts for every post.
                             nodeCollection = nodeManager.GetNodeCollection(htmlDocument, ".//ul[@class='sub']/li");
 
                             // Iterate over all subposts
