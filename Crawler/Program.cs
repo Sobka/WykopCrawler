@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using HtmlAgilityPack;
 using static Crawler.DatabaseControls;
+using System.Threading;
 
 namespace Crawler
 {
@@ -39,7 +40,7 @@ namespace Crawler
             int skipped = 0;
 
             // Loop over all pages
-            for (int i = 1; i < 2; i++)
+            for (int i = 1; i < 10; i++)
             {
                 // Try-catch block to avoid getting NullReferenceExceptions 
                 try
@@ -61,7 +62,12 @@ namespace Crawler
                         string description = nodeManager.Escape(nodeManager.GetInnerTextValue(node, ".//div[@class='description']/p/a").Trim());
                         DateTime date = nodeManager.GetDate(node, ".//span[@class='affect']/time", "title");
 
-                        // TODO: Add check if post is already in database
+                        if (databaseControls.IsInTable(title))
+                        {
+                            Console.WriteLine($"{index}. Duplicate post - skipped");
+                            index++;
+                            continue;
+                        }
 
                         // Skip all posts by Wykop Poleca
                         if (username.Equals("Wykop Poleca"))
@@ -101,12 +107,12 @@ namespace Crawler
                             nodeCollection = nodeManager.GetNodeCollection(htmlDocument, ".//ul[@class='sub']/li");
 
                             // Iterate over all subposts
-                            foreach (HtmlNode commentNode in nodeCollection)
-                            {
-                                int commentIsOp = 0;
-                                string commentUsername = nodeManager.GetInnerTextValue(commentNode, ".//div[contains(@class, 'author ellipsis')]/a[1]/b");
-                                Console.WriteLine($"  |----->{commentUsername}");
-                            }
+                            //foreach (HtmlNode commentNode in nodeCollection)
+                            //{
+                            //    int commentIsOp = 0;
+                            //    string commentUsername = nodeManager.GetInnerTextValue(commentNode, ".//div[contains(@class, 'author ellipsis')]/a[1]/b");
+                            //    Console.WriteLine($"  |----->{commentUsername}");
+                            //}
                         }
 
                         // Insert data into database

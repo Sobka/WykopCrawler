@@ -33,7 +33,7 @@ namespace Crawler
             "tag11 TEXT);";
         public readonly string createCommentsTable = "CREATE TABLE IF NOT EXISTS Comments (" +
             "id TEXT," +
-            "isOP NUMBER," + // 1 or 0
+            "isOP NUMBER," + // 1 if yes 0 if no
             "username TEXT," +
             "pluses NUMBER," +
             "comment TEXT," +
@@ -130,5 +130,31 @@ namespace Crawler
             SQLiteCommand command = new SQLiteCommand(indexSQL, connection);
             command.ExecuteNonQuery();
         }
+
+        public bool IsInTable(string title)
+        {
+            bool found = false;
+            string selectSQL = $"SELECT title FROM Main where title = @title";
+            using (SQLiteCommand command = connection.CreateCommand()) 
+            {
+                command.CommandText = selectSQL;
+                command.CommandType = System.Data.CommandType.Text;
+                command.Parameters.Add(new SQLiteParameter("@title", title));
+                using (SQLiteDataReader reader = command.ExecuteReader())
+                {
+                    while (reader.Read())
+                    {
+                        string r = reader.GetString(0);
+                        if (r.Equals(title))
+                        {
+                            found = true;
+                            break;
+                        }
+                    }
+                }
+            }
+            return found;          
+        }
+
     }
 }
