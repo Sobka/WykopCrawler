@@ -46,7 +46,7 @@ namespace Crawler
             Close
         }
 
-        public SQLiteConnection connection { get; private set; }
+        public SQLiteConnection Connection { get; private set; }
 
         public void CreateDatabase(string databaseName)
         {
@@ -54,7 +54,7 @@ namespace Crawler
             {
                 databaseName += ".db";
             }
-            connection = new SQLiteConnection($"Data Source=..\\..\\{databaseName}");
+            Connection = new SQLiteConnection($"Data Source=..\\..\\{databaseName}");
         }
 
         public void ManageConnection(ConnectionControls controls)
@@ -62,11 +62,11 @@ namespace Crawler
             switch (controls)
             {
                 case ConnectionControls.Open:
-                    connection.Open();
+                    Connection.Open();
                     Console.WriteLine("Opening connection to the database...");
                     break;
                 case ConnectionControls.Close:
-                    connection.Close();
+                    Connection.Close();
                     Console.WriteLine("Closing connection to the database...");
                     break;
             }
@@ -74,7 +74,7 @@ namespace Crawler
 
         public void CreateTable(string createTableSQL)
         {
-            SQLiteCommand command = new SQLiteCommand(createTableSQL, connection);
+            SQLiteCommand command = new SQLiteCommand(createTableSQL, Connection);
             command.ExecuteNonQuery();
         }
 
@@ -94,7 +94,7 @@ namespace Crawler
             string insertSQL = "INSERT INTO Main (id, title, diggs, username, source, comments, description, date) "
                 + "VALUES (@id, @title, @diggs, @username, @source, @comments, @description, @date)";
 
-            SQLiteCommand command = new SQLiteCommand(insertSQL, connection);
+            SQLiteCommand command = new SQLiteCommand(insertSQL, Connection);
             command.Parameters.AddRange(parameters);
             command.ExecuteNonQuery();
         }
@@ -119,15 +119,37 @@ namespace Crawler
 
             string insertSQL = "INSERT INTO Tags (id, tag1, tag2, tag3, tag4, tag5, tag6, tag7, tag8, tag9, tag10, tag11) VALUES (@id, @tag1, @tag2, @tag3, @tag4, @tag5, @tag6, @tag7, @tag8, @tag9, @tag10, @tag11)";
 
-            SQLiteCommand command = new SQLiteCommand(insertSQL, connection);
+            SQLiteCommand command = new SQLiteCommand(insertSQL, Connection);
             command.Parameters.AddRange(parameters);
             command.ExecuteNonQuery();
         }  
+
+
+
+        public void InsertIntoComments(string id, int isOP, string username, int pluses, string comment, string via, DateTime date)
+        {
+            using (SQLiteCommand command = Connection.CreateCommand())
+            {
+                SQLiteParameter[] parameters =
+                {
+                    new SQLiteParameter("@id", id),
+                    new SQLiteParameter("@isOP", isOP),
+                    new SQLiteParameter("@username", username),
+                    new SQLiteParameter("@pluses", pluses),
+                    new SQLiteParameter("@comment", comment),
+                    new SQLiteParameter("@via", via),
+                    new SQLiteParameter("@date", date)
+                };
+                command.CommandText = "INSERT INTO Comments (id, isOP, username, pluses, comment, via, date) VALUES (@id, @isOP, @username, @pluses, @comment, @via, @date);";
+                command.Parameters.AddRange(parameters);
+                command.ExecuteNonQuery();
+            }
+        }
         
         public void SetIndex(string tableName, string indexName, string indexColumn)
         {
-            string indexSQL = $"CREATE UNIQUE INDEX IF NOT EXISTS {indexName} ON {tableName}({indexColumn});";
-            SQLiteCommand command = new SQLiteCommand(indexSQL, connection);
+            string indexSQL = $"CREATE  INDEX IF NOT EXISTS {indexName} ON {tableName}({indexColumn});";
+            SQLiteCommand command = new SQLiteCommand(indexSQL, Connection);
             command.ExecuteNonQuery();
         }
 
@@ -135,7 +157,7 @@ namespace Crawler
         {
             bool found = false;
             string selectSQL = $"SELECT title FROM Main where title = @title";
-            using (SQLiteCommand command = connection.CreateCommand()) 
+            using (SQLiteCommand command = Connection.CreateCommand()) 
             {
                 command.CommandText = selectSQL;
                 command.CommandType = System.Data.CommandType.Text;

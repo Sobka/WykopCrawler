@@ -41,7 +41,7 @@ namespace Crawler
                 {
                     return value;
                 }
-                Regex re = new Regex(@"\d+");
+                Regex re = new Regex(@"-?\d+");
                 Match match = re.Match(defaultString);
                 value = Int32.Parse(match.ToString());
             }
@@ -65,7 +65,8 @@ namespace Crawler
 
         public int GetNumOfPages(string url, string xpath)
         {
-            string pages = LoadPage(url).DocumentNode.SelectNodes(xpath)[7].InnerText;
+            int index = LoadPage(url).DocumentNode.SelectNodes(xpath).Count;
+            string pages = LoadPage(url).DocumentNode.SelectNodes(xpath)[index-2].InnerText;
             return Int32.Parse(pages);
         }
 

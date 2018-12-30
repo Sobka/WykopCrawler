@@ -27,6 +27,7 @@ namespace Crawler
             databaseControls.CreateTable(databaseControls.createCommentsTable);
             databaseControls.SetIndex("Main", "idx_main", "id");
             databaseControls.SetIndex("Tags", "idx_tags", "id");
+            databaseControls.SetIndex("Comments", "idx_comments", "id");
 
             // Define node manager
             NodeManager nodeManager = new NodeManager();           
@@ -40,7 +41,7 @@ namespace Crawler
             int skipped = 0;
 
             // Loop over all pages
-            for (int i = 1; i < 10; i++)
+            for (int i = 2; i < 3; i++)
             {
                 // Try-catch block to avoid getting NullReferenceExceptions 
                 try
@@ -53,6 +54,8 @@ namespace Crawler
                     // Iterate over every post container in collection and define post info
                     foreach (HtmlNode node in nodeCollection)
                     {
+                        int indexOP = 1;
+
                         string id = Guid.NewGuid().ToString();
                         string title = nodeManager.Escape(nodeManager.GetInnerTextValue(node, ".//div[@class='lcontrast m-reset-margin']/h2/a").Trim());
                         int diggs = nodeManager.GetIntValue(node, ".//div[@class='diggbox ']//a//span");
@@ -83,58 +86,85 @@ namespace Crawler
 
                         // Get link to the post page and load it
                         string link = nodeManager.GetAttribute(node, ".//div[@class='lcontrast m-reset-margin']/h2/a", "href");
-                        htmlDocument = nodeManager.LoadPage(link);
-
-                        // Get all post on post page
-                        nodeCollection = nodeManager.GetNodeCollection(htmlDocument, ".//ul[@class='comments-stream']/li[@class='iC']");
+                        int commentsPages = nodeManager.GetNumOfPages(link, ".//div[@class='wblock rbl-block pager']/p/a[contains(@class, 'button')]");
 
                         // Console output, mostly for debugging
                         Console.WriteLine($"{index}. {title}");
-                        index++;
 
-                        // Iterate over every op post in comments page
-                        foreach (HtmlNode opCommentNode in nodeCollection)
+                        for (int k = 1; k < commentsPages; k++)
                         {
-                            int opIsOp = 1;
-                            string opUsername = nodeManager.GetInnerTextValue(opCommentNode, ".//div[contains(@class, 'wblock lcontrast')]//div[contains(@class, 'author ellipsis')]/a[1]/b");
-                            int opPluses = nodeManager.GetIntValue(opCommentNode, ".//p[@class='vC']");
-                            string opComment = nodeManager.GetInnerTextValue(opCommentNode, ".//div[@class='text ']/p").Trim();
-                            string opVia = nodeManager.GetInnerTextValue(opCommentNode, ".//small[@class='affect']/span/a");
-                            DateTime opDate = nodeManager.GetDate(opCommentNode, ".//small[@class='affect']/time", "title");
-                            Console.WriteLine($"  |-->{opUsername}, {opDate}");
+                            HtmlDocument postPage = nodeManager.LoadPage($"{link}/strona/{k}/");
 
-                            // Get all subposts for every post.
-                            nodeCollection = nodeManager.GetNodeCollection(htmlDocument, ".//ul[@class='sub']/li");
+                            // Get all post on post page
+                            HtmlNodeCollection opContainers = nodeManager.GetNodeCollection(postPage, ".//li[@class='iC']");
 
-                            // Iterate over all subposts
-                            //foreach (HtmlNode commentNode in nodeCollection)
-                            //{
-                            //    int commentIsOp = 0;
-                            //    string commentUsername = nodeManager.GetInnerTextValue(commentNode, ".//div[contains(@class, 'author ellipsis')]/a[1]/b");
-                            //    Console.WriteLine($"  |----->{commentUsername}");
-                            //}
+                            // Iterate over every op post in comments page
+                            foreach (HtmlNode opCommentNode in opContainers) ///html[1]/body[1]/div[2]/div[1]/div[2]/div[1]/ul[1]/li[3]
+                            {
+                                //string n = opCommentNode.XPath;
+                                int opIsOp = 1;
+                                string opUsername = nodeManager.GetInnerTextValue(opCommentNode, ".//div[contains(@class, 'wblock lcontrast')]//div[contains(@class, 'author ellipsis')]//b");
+                                int opPluses = nodeManager.GetIntValue(opCommentNode, ".//p[@class='vC']");
+                                string opComment = nodeManager.GetInnerTextValue(opCommentNode, ".//div[@class='text ']/p").Trim();
+                                string opVia = nodeManager.GetInnerTextValue(opCommentNode, ".//small[@class='affect']/span/a");
+                                DateTime opDate = nodeManager.GetDate(opCommentNode, ".//small[@class='affect']/time", "title");
+                                Console.WriteLine($"  |--> {index}.{indexOP}. {opUsername}");
+                                
+                                databaseControls.InsertIntoComments(id, opIsOp, opUsername, opPluses, opComment, opVia, opDate);
+
+                                // Get all subposts for every post.
+                                HtmlNodeCollection commentsNodes = nodeManager.GetNodeCollection(postPage, $"{opCommentNode.XPath}//ul[@class='sub']/li");
+                                if (commentsNodes == null)
+                                {
+                                    indexOP++;
+                                    continue;
+                                }
+
+                                int indexComment = 1;
+
+                                // Iterate over all subposts
+                                foreach (HtmlNode commentNode in commentsNodes)
+                                {
+                                    //string a = commentNode.XPath;
+                                    int commentIsOp = 0;
+                                    string commentUsername = nodeManager.GetInnerTextValue(commentNode, ".//div[contains(@class, 'author ellipsis')]/a[1]/b").Replace("@", "");
+                                    int commentPluses = nodeManager.GetIntValue(commentNode, ".//p[@class='vC']");
+                                    string commentComment = nodeManager.GetInnerTextValue(commentNode, ".//div[@class='text ']/p").Trim();
+                                    string commentVia = nodeManager.GetInnerTextValue(commentNode, ".//small[@class='affect']/span/a");
+                                    DateTime commentDate = nodeManager.GetDate(commentNode, ".//small[@class='affect']/time", "title");
+
+                                    databaseControls.InsertIntoComments(id, commentIsOp, commentUsername, commentPluses, commentComment, commentVia, commentDate);
+                                    Console.WriteLine($"  |  |---> {index}.{indexOP}.{indexComment}. {commentUsername}");
+                                    indexComment++;
+                                }
+                                indexOP++;
+                            }
                         }
 
+                        index++;
                         // Insert data into database
                         databaseControls.InsertIntoMain(id, title, diggs, username, source, comments, description, date);
-                        databaseControls.InsertIntoTags(id, tags[0], tags[1], tags[2], tags[3], tags[4], tags[5], tags[6], tags[7], tags[8], tags[9], tags[10]);            
+                        databaseControls.InsertIntoTags(id, tags[0], tags[1], tags[2], tags[3], tags[4], tags[5], tags[6], tags[7], tags[8], tags[9], tags[10]);
                     }
                 }
 
-                catch (NullReferenceException)
+                catch (NullReferenceException e)
                 {
                     nullReferences++;
-                    Console.WriteLine($"NullReferenceException, total: {nullReferences}");
+                    Console.WriteLine(e.StackTrace);
+                    Console.WriteLine(e.Message);
                 }
                 page++;
-
             }
-            // Close database connection
+
+            // Close database connection 
+            databaseControls.ManageConnection(ConnectionControls.Close);
+
+            // Some console output
             Console.WriteLine("");
             Console.WriteLine($"Total errors: {nullReferences}");
             Console.WriteLine($"Total post skipped: {skipped}");
-
-            databaseControls.ManageConnection(ConnectionControls.Close);
+            Console.ReadLine();
         }
     }
 }
