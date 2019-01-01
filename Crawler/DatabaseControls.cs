@@ -33,6 +33,7 @@ namespace Crawler
             "tag11 TEXT);";
         public readonly string createCommentsTable = "CREATE TABLE IF NOT EXISTS Comments (" +
             "id TEXT," +
+            "commentId TEXT," +
             "isOP NUMBER," + // 1 if yes 0 if no
             "username TEXT," +
             "pluses NUMBER," +
@@ -124,15 +125,14 @@ namespace Crawler
             command.ExecuteNonQuery();
         }  
 
-
-
-        public void InsertIntoComments(string id, int isOP, string username, int pluses, string comment, string via, DateTime date)
+        public void InsertIntoComments(string id, string commentId, int isOP, string username, int pluses, string comment, string via, DateTime date)
         {
             using (SQLiteCommand command = Connection.CreateCommand())
             {
                 SQLiteParameter[] parameters =
                 {
                     new SQLiteParameter("@id", id),
+                    new SQLiteParameter("@commentId", commentId),
                     new SQLiteParameter("@isOP", isOP),
                     new SQLiteParameter("@username", username),
                     new SQLiteParameter("@pluses", pluses),
@@ -140,7 +140,7 @@ namespace Crawler
                     new SQLiteParameter("@via", via),
                     new SQLiteParameter("@date", date)
                 };
-                command.CommandText = "INSERT INTO Comments (id, isOP, username, pluses, comment, via, date) VALUES (@id, @isOP, @username, @pluses, @comment, @via, @date);";
+                command.CommandText = "INSERT INTO Comments (id, commentId, isOP, username, pluses, comment, via, date) VALUES (@id, @commentId, @isOP, @username, @pluses, @comment, @via, @date);";
                 command.Parameters.AddRange(parameters);
                 command.ExecuteNonQuery();
             }
@@ -153,23 +153,24 @@ namespace Crawler
             command.ExecuteNonQuery();
         }
 
-        public bool IsInTable(string title)
+        public bool IsInComments(string comment, string commentId, string id)
         {
             bool found = false;
-            string selectSQL = $"SELECT title FROM Main where title = @title";
+            string selectSQL = $"SELECT id, commentId, comment FROM Comments WHERE comment = @comment";
             using (SQLiteCommand command = Connection.CreateCommand()) 
             {
                 command.CommandText = selectSQL;
                 command.CommandType = System.Data.CommandType.Text;
-                command.Parameters.Add(new SQLiteParameter("@title", title));
+                command.Parameters.Add(new SQLiteParameter("@comment", comment));
                 using (SQLiteDataReader reader = command.ExecuteReader())
                 {
                     while (reader.Read())
                     {
-                        string r = reader.GetString(0);
-                        if (r.Equals(title))
+                        if (reader.GetString(2).Equals(comment))
                         {
                             found = true;
+                            id = reader.GetString(0);
+                            commentId = reader.GetString(1);
                             break;
                         }
                     }
@@ -177,6 +178,32 @@ namespace Crawler
             }
             return found;          
         }
+
+        public bool IsInMain(string title)
+        {
+            bool found = false;
+            string sql = $"SELECT title FROM Main WHERE title = @title";
+            using (SQLiteCommand command = Connection.CreateCommand())
+            {
+                command.CommandText = sql;
+                command.Parameters.Add(new SQLiteParameter("@title", title));
+                using (SQLiteDataReader r = command.ExecuteReader())
+                {
+                    while (r.Read())
+                    {
+                        if (r.GetString(0).Equals(title))
+                        {
+                            found = true;
+                            break;
+                        }
+                    }
+                }
+            }
+            return found;
+
+        }
+
+
 
     }
 }

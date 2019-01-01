@@ -65,9 +65,14 @@ namespace Crawler
 
         public int GetNumOfPages(string url, string xpath)
         {
-            int index = LoadPage(url).DocumentNode.SelectNodes(xpath).Count;
-            string pages = LoadPage(url).DocumentNode.SelectNodes(xpath)[index-2].InnerText;
-            return Int32.Parse(pages);
+            int p = 1;
+            if (LoadPage(url).DocumentNode.SelectNodes(xpath) != null)
+            {
+                int index = LoadPage(url).DocumentNode.SelectNodes(xpath).Count;
+                string pages = LoadPage(url).DocumentNode.SelectNodes(xpath)[index - 2].InnerText;
+                p = Int32.Parse(pages);
+            }
+            return p;
         }
 
         public string[] GetTags(HtmlNode node, string xpath)
@@ -94,6 +99,4 @@ namespace Crawler
             return returnAttribute;
         }
     }
-
-    
 }
