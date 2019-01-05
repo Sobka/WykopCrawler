@@ -21,9 +21,9 @@ namespace Crawler
             return collection;
         }
 
-        public string GetGenericValue(HtmlNode node, string xpath)
+        public string GetInnerTextValue(HtmlNode node, string xpath)
         {
-            string value = "Brak danych";
+            string value = "";
             if (node.SelectSingleNode(xpath) != null)
             {
                 value = node.SelectSingleNode(xpath).InnerText;
@@ -41,7 +41,7 @@ namespace Crawler
                 {
                     return value;
                 }
-                Regex re = new Regex(@"\d+");
+                Regex re = new Regex(@"-?\d+");
                 Match match = re.Match(defaultString);
                 value = Int32.Parse(match.ToString());
             }
@@ -65,8 +65,14 @@ namespace Crawler
 
         public int GetNumOfPages(string url, string xpath)
         {
-            string pages = LoadPage(url).DocumentNode.SelectNodes(xpath)[7].InnerText;
-            return Int32.Parse(pages);
+            int p = 1;
+            if (LoadPage(url).DocumentNode.SelectNodes(xpath) != null)
+            {
+                int index = LoadPage(url).DocumentNode.SelectNodes(xpath).Count;
+                string pages = LoadPage(url).DocumentNode.SelectNodes(xpath)[index - 2].InnerText;
+                p = Int32.Parse(pages);
+            }
+            return p;
         }
 
         public string[] GetTags(HtmlNode node, string xpath)
@@ -82,7 +88,15 @@ namespace Crawler
             }
             return tags;
         }
-    }
 
-    
+        public string GetAttribute(HtmlNode node, string xpath, string attribute)
+        {
+            string returnAttribute = "";
+            if (node.SelectSingleNode(xpath) != null)
+            {
+                returnAttribute = node.SelectSingleNode(xpath).GetAttributeValue(attribute, "");
+            }
+            return returnAttribute;
+        }
+    }
 }
