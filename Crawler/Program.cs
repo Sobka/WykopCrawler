@@ -41,7 +41,7 @@ namespace Crawler
             int skipped = 0;
 
             // Loop over all pages
-            for (int i = 1; i < 2; i++)
+            for (int i = 1; i < 300; i++)
             {
                 // Try-catch block to avoid getting NullReferenceExceptions 
                 try
